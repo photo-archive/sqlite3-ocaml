@@ -1721,3 +1721,48 @@ CAMLprim intnat caml_sqlite3_backup_pagecount(value v_backup) {
 CAMLprim value caml_sqlite3_backup_pagecount_bc(value v_backup) {
   return Val_int(caml_sqlite3_backup_pagecount(v_backup));
 }
+
+/* BLOB streaming API */
+
+#include <caml/bigarray.h>
+
+CAMLprim value caml_sqlite3_blob_read_into_bigarray(value v_db, value v_table,
+                                                     value v_column,
+                                                     value v_rowid,
+                                                     value v_bigarray) {
+  CAMLparam5(v_db, v_table, v_column, v_rowid, v_bigarray);
+  db_wrap *dbw = Sqlite3_val(v_db);
+  sqlite3_blob *blob = NULL;
+  int rc;
+  int blob_size, buf_size, bytes_to_read;
+  void *buf_data;
+
+  check_db(dbw, "blob_read_into_bigarray");
+
+  /* Get bigarray data pointer and size */
+  buf_data = Caml_ba_data_val(v_bigarray);
+  buf_size = Caml_ba_array_val(v_bigarray)->dim[0];
+
+  /* Open the blob for reading (flags = 0 means read-only) */
+  rc = sqlite3_blob_open(dbw->db, "main", String_val(v_table),
+                         String_val(v_column), Int64_val(v_rowid), 0, &blob);
+  if (rc != SQLITE_OK || blob == NULL) {
+    if (blob)
+      sqlite3_blob_close(blob);
+    CAMLreturn(Val_int(0));
+  }
+
+  /* Get blob size and determine how many bytes to read */
+  blob_size = sqlite3_blob_bytes(blob);
+  bytes_to_read = (blob_size < buf_size) ? blob_size : buf_size;
+
+  /* Read blob data into bigarray */
+  rc = sqlite3_blob_read(blob, buf_data, bytes_to_read, 0);
+  sqlite3_blob_close(blob);
+
+  if (rc != SQLITE_OK) {
+    CAMLreturn(Val_int(0));
+  }
+
+  CAMLreturn(Val_int(bytes_to_read));
+}

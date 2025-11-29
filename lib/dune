@@ -1,5 +1,6 @@
 (library
  (public_name sqlite3)
+ (libraries bigarray)
  (foreign_stubs
   (language c)
   (names sqlite3_stubs)

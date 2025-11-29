@@ -1000,3 +1000,23 @@ val sleep : int -> int
     @return
       the number of milliseconds of sleep actually requested from the operating
       system. *)
+
+(** {2 BLOB streaming API} *)
+
+val blob_read_into_bigarray :
+  db ->
+  string ->
+  string ->
+  int64 ->
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
+  int
+(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB from
+    the specified [table] and [column] at [rowid] directly into the [buffer]
+    bigarray without intermediate allocations.
+
+    This function opens a BLOB handle, reads at most [Bigarray.Array1.dim buffer]
+    bytes, and closes the handle.
+
+    @return the number of bytes copied into the buffer, or 0 on failure.
+
+    @raise SqliteError if an invalid database handle is passed. *)

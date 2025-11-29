@@ -572,6 +572,19 @@ end
 external init : unit -> unit = "caml_sqlite3_init"
 external cleanup : unit -> unit = "caml_sqlite3_cleanup"
 
+(* BLOB streaming API *)
+
+external blob_read_into_bigarray :
+  db ->
+  string ->
+  string ->
+  int64 ->
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
+  int = "caml_sqlite3_blob_read_into_bigarray"
+(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB
+    from the specified [table] and [column] at [rowid] into the [buffer].
+    @return the number of bytes copied, or 0 on failure. *)
+
 let () =
   Callback.register_exception "Sqlite3.InternalError" (InternalError "");
   Callback.register_exception "Sqlite3.Error" (Error "");
