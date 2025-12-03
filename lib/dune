@@ -13,4 +13,7 @@
 (rule
  (targets c_flags.sexp c_library_flags.sexp)
  (action
-  (run ./config/discover.exe)))
+  (setenv
+   SQLITE3_OCAML_BREWCHECK
+   "1"
+   (run ./config/discover.exe))))

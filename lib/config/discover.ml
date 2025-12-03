@@ -71,7 +71,7 @@ let split_ws str =
 let () =
   let module C = Configurator.V1 in
   C.main ~name:"sqlite3" (fun c ->
-      let is_macosx =
+      let _is_macosx =
         opt_map (C.ocaml_config_var c "system") ~default:false ~f:(function
           | "macosx" -> true
           | _ -> false)

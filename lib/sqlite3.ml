@@ -585,6 +585,19 @@ external blob_read_into_bigarray :
     from the specified [table] and [column] at [rowid] into the [buffer].
     @return the number of bytes copied, or 0 on failure. *)
 
+external blob_write_from_bigarray :
+  db ->
+  string ->
+  string ->
+  int64 ->
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
+  int ->
+  bool = "caml_sqlite3_blob_write_from_bigarray_bc" "caml_sqlite3_blob_write_from_bigarray"
+(** [blob_write_from_bigarray db table column rowid buffer length] writes [length]
+    bytes from [buffer] to the BLOB at the specified [table], [column], and [rowid].
+    The row must already exist with a BLOB of sufficient size (use zeroblob()).
+    @return true on success, false on failure. *)
+
 let () =
   Callback.register_exception "Sqlite3.InternalError" (InternalError "");
   Callback.register_exception "Sqlite3.Error" (Error "");

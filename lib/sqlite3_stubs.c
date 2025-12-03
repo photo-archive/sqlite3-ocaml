@@ -1766,3 +1766,44 @@ CAMLprim value caml_sqlite3_blob_read_into_bigarray(value v_db, value v_table,
 
   CAMLreturn(Val_int(bytes_to_read));
 }
+
+CAMLprim value caml_sqlite3_blob_write_from_bigarray(value v_db, value v_table,
+                                                     value v_column,
+                                                     value v_rowid,
+                                                     value v_bigarray,
+                                                     value v_length) {
+  CAMLparam5(v_db, v_table, v_column, v_rowid, v_bigarray);
+  CAMLxparam1(v_length);
+  db_wrap *dbw = Sqlite3_val(v_db);
+  sqlite3_blob *blob = NULL;
+  int rc;
+  int length;
+  void *buf_data;
+
+  check_db(dbw, "blob_write_from_bigarray");
+
+  /* Get bigarray data pointer and length to write */
+  buf_data = Caml_ba_data_val(v_bigarray);
+  length = Int_val(v_length);
+
+  /* Open the blob for writing (flags = 1 means read-write) */
+  rc = sqlite3_blob_open(dbw->db, "main", String_val(v_table),
+                         String_val(v_column), Int64_val(v_rowid), 1, &blob);
+  if (rc != SQLITE_OK || blob == NULL) {
+    if (blob)
+      sqlite3_blob_close(blob);
+    CAMLreturn(Val_bool(0));
+  }
+
+  /* Write bigarray data to blob */
+  rc = sqlite3_blob_write(blob, buf_data, length, 0);
+  sqlite3_blob_close(blob);
+
+  CAMLreturn(Val_bool(rc == SQLITE_OK));
+}
+
+CAMLprim value caml_sqlite3_blob_write_from_bigarray_bc(value *argv, int argn) {
+  (void)argn;
+  return caml_sqlite3_blob_write_from_bigarray(argv[0], argv[1], argv[2],
+                                               argv[3], argv[4], argv[5]);
+}

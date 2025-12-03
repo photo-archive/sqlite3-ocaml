@@ -1020,3 +1020,22 @@ val blob_read_into_bigarray :
     @return the number of bytes copied into the buffer, or 0 on failure.
 
     @raise SqliteError if an invalid database handle is passed. *)
+
+val blob_write_from_bigarray :
+  db ->
+  string ->
+  string ->
+  int64 ->
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
+  int ->
+  bool
+(** [blob_write_from_bigarray db table column rowid buffer length] writes [length]
+    bytes from [buffer] to the BLOB at the specified [table], [column], and [rowid]
+    directly from the bigarray without intermediate allocations.
+
+    The row must already exist with a BLOB of at least [length] bytes.
+    Use [zeroblob(n)] in INSERT to pre-allocate the BLOB space.
+
+    @return true on success, false on failure.
+
+    @raise SqliteError if an invalid database handle is passed. *)
