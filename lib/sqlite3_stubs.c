@@ -558,10 +558,35 @@ CAMLprim value caml_sqlite3_enable_load_extension(value v_db, value v_onoff) {
   ret = sqlite3_enable_load_extension(dbw->db, Bool_val(v_onoff));
   return Val_bool(ret == SQLITE_OK);
 }
+
+CAMLprim value caml_sqlite3_load_extension(value v_db, value v_file) {
+  CAMLparam2(v_db, v_file);
+  char *errmsg = NULL;
+  int ret;
+  db_wrap *dbw = Sqlite3_val(v_db);
+  check_db(dbw, "load_extension");
+  ret = sqlite3_load_extension(dbw->db, String_val(v_file), NULL, &errmsg);
+  if (ret != SQLITE_OK) {
+    value v_err;
+    if (errmsg) {
+      v_err = caml_copy_string(errmsg);
+      sqlite3_free(errmsg);
+    } else {
+      v_err = caml_copy_string("unknown error");
+    }
+    caml_raise_with_arg(*caml_named_value("Sqlite3.Error"), v_err);
+  }
+  CAMLreturn(Val_unit);
+}
 #else
 CAMLprim value caml_sqlite3_enable_load_extension(value __unused v_db,
                                                   value __unused v_onoff) {
   caml_failwith("enable_load_extension: unsupported");
+}
+
+CAMLprim value caml_sqlite3_load_extension(value __unused v_db,
+                                           value __unused v_file) {
+  caml_failwith("load_extension: unsupported");
 }
 #endif
 
@@ -1727,9 +1752,9 @@ CAMLprim value caml_sqlite3_backup_pagecount_bc(value v_backup) {
 #include <caml/bigarray.h>
 
 CAMLprim value caml_sqlite3_blob_read_into_bigarray(value v_db, value v_table,
-                                                     value v_column,
-                                                     value v_rowid,
-                                                     value v_bigarray) {
+                                                    value v_column,
+                                                    value v_rowid,
+                                                    value v_bigarray) {
   CAMLparam5(v_db, v_table, v_column, v_rowid, v_bigarray);
   db_wrap *dbw = Sqlite3_val(v_db);
   sqlite3_blob *blob = NULL;

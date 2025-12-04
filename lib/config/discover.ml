@@ -71,7 +71,7 @@ let split_ws str =
 let () =
   let module C = Configurator.V1 in
   C.main ~name:"sqlite3" (fun c ->
-      let _is_macosx =
+      let is_macosx =
         opt_map (C.ocaml_config_var c "system") ~default:false ~f:(function
           | "macosx" -> true
           | _ -> false)
@@ -100,7 +100,10 @@ let () =
         | [ cflags ] ->
             let cflags = split_ws cflags in
             if
-              is_macosx
+              (is_macosx
+              && not
+                   (opt_is_some
+                      (getenv_opt "SQLITE3_ENABLE_LOADABLE_EXTENSIONS")))
               || opt_is_some (getenv_opt "SQLITE3_DISABLE_LOADABLE_EXTENSIONS")
             then "-DSQLITE3_DISABLE_LOADABLE_EXTENSIONS" :: cflags
             else cflags

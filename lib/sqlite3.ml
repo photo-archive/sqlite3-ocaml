@@ -431,6 +431,8 @@ external busy_timeout : db -> (int[@untagged]) -> unit
 external enable_load_extension : db -> bool -> bool
   = "caml_sqlite3_enable_load_extension"
 
+external load_extension : db -> string -> unit = "caml_sqlite3_load_extension"
+
 let row_blobs stmt = Array.init (data_count stmt) (column_blob stmt)
 let row_data stmt = Array.init (data_count stmt) (column stmt)
 let row_names stmt = Array.init (data_count stmt) (column_name stmt)
@@ -581,8 +583,8 @@ external blob_read_into_bigarray :
   int64 ->
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
   int = "caml_sqlite3_blob_read_into_bigarray"
-(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB
-    from the specified [table] and [column] at [rowid] into the [buffer].
+(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB from the
+    specified [table] and [column] at [rowid] into the [buffer].
     @return the number of bytes copied, or 0 on failure. *)
 
 external blob_write_from_bigarray :

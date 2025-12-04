@@ -339,6 +339,10 @@ val enable_load_extension : db -> bool -> bool
 (** [enable_load_extension db onoff] enable/disable the SQLite3 load extension.
     @return [false] if the operation fails, [true] otherwise. *)
 
+val load_extension : db -> string -> unit
+(** [load_extension db file] loads the SQLite extension from [file].
+    @raise Sqlite3.Error if loading fails. *)
+
 val errcode : db -> Rc.t
 (** [errcode db]
     @return the error code of the last operation on database [db].
@@ -1010,12 +1014,12 @@ val blob_read_into_bigarray :
   int64 ->
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t ->
   int
-(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB from
-    the specified [table] and [column] at [rowid] directly into the [buffer]
+(** [blob_read_into_bigarray db table column rowid buffer] reads a BLOB from the
+    specified [table] and [column] at [rowid] directly into the [buffer]
     bigarray without intermediate allocations.
 
-    This function opens a BLOB handle, reads at most [Bigarray.Array1.dim buffer]
-    bytes, and closes the handle.
+    This function opens a BLOB handle, reads at most
+    [Bigarray.Array1.dim buffer] bytes, and closes the handle.
 
     @return the number of bytes copied into the buffer, or 0 on failure.
 
