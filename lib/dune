@@ -16,4 +16,7 @@
   (setenv
    SQLITE3_OCAML_BREWCHECK
    "1"
-   (run ./config/discover.exe))))
+   (setenv
+    SQLITE3_ENABLE_LOADABLE_EXTENSIONS
+    "1"
+    (run ./config/discover.exe)))))
